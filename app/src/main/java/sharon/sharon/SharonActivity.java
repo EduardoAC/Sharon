@@ -27,6 +27,9 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 //import com.android.volley.RequestQueue;
 //import com.android.volley.toolbox.Volley;
 
@@ -92,8 +95,7 @@ public class SharonActivity extends ActionBarActivity {
         return true;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+    public boolean onOptionsIctemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
@@ -163,6 +165,21 @@ public class SharonActivity extends ActionBarActivity {
                             }else if(code.equals("4")){
                                 //Slow motion stop
                             }else{
+                                int mW;
+                                int mH;
+
+                                String patternString = "(.*),(.*)";
+                                Pattern pattern = Pattern.compile(patternString);
+                                Matcher matcher = pattern.matcher(code);
+                                while(matcher.find()) {
+                                    Log.i("Websocket.width", matcher.group(1));
+                                    Log.i("Websocket.height", matcher.group(2));
+                                    mW = Integer.parseInt(matcher.group(1));
+                                    mH = Integer.parseInt(matcher.group(2));
+                                    mVodView.setFixedVideoSize(mW, mH); // important
+                                    mRootParam.width = mW;
+                                    mRootParam.height = mH;
+                                }
 
                             }
 
