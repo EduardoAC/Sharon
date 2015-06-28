@@ -1,6 +1,7 @@
 package sharon.sharon;
 
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
@@ -15,6 +16,16 @@ import android.view.View;
 import android.view.View.OnTouchListener;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
+import android.widget.TextView;
+
+import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.handshake.ServerHandshake;
+
+//import com.android.volley.RequestQueue;
+//import com.android.volley.toolbox.Volley;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class SharonActivity extends ActionBarActivity {
     // minimum video view width
@@ -28,6 +39,11 @@ public class SharonActivity extends ActionBarActivity {
     // detector to single tab
     private GestureDetector mGestureDetector;
 
+    //private RequestQueue queue;
+    private String serverUrl = "/http://85.214.151.40/";
+    private WebSocketClient mWebSocketClient;
+    private boolean enabeSendMessages = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,13 +52,17 @@ public class SharonActivity extends ActionBarActivity {
         mVodView = (VodView) findViewById(R.id.vodView1);
 
         // Video Uri
-        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + +R.raw.longvideo);
+        Uri uri = Uri.parse("android.resource://" + getPackageName() + "/" + +R.raw.canon_gladiator);
+        //Uri uri = Uri.parse("http://85.214.151.40/canon_gladiator.mp4");
+
         mVodView.setVideoURI(uri);
         mVodView.requestFocus();
         mVodView.start();
         // set up gesture listeners
         mScaleGestureDetector = new ScaleGestureDetector(this, new MyScaleGestureListener());
         mGestureDetector = new GestureDetector(this, new MySimpleOnGestureListener());
+
+        //queue = Volley.newRequestQueue(this);
 
         mVodView.setOnTouchListener(new OnTouchListener() {
 
@@ -87,16 +107,85 @@ public class SharonActivity extends ActionBarActivity {
         mVodView.pause();
         super.onPause();
     }
+
+    private void connectWebSocket() {
+        URI uri;
+        try {
+            uri = new URI("ws://85.214.151.40:8080");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            return;
+        }
+
+        mWebSocketClient = new WebSocketClient(uri) {
+            @Override
+            public void onOpen(ServerHandshake serverHandshake) {
+                Log.i("Websocket", "Opened");
+                mWebSocketClient.send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+            }
+
+            @Override
+            public void onMessage(String s) {
+                final String message = s;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if(message == "0"){
+                            return;
+                        }
+                        if(message == "1"){
+                            if(mVodView.isPlaying()){
+                                mVodView.pause();
+                            }
+                        }else if(message == "2"){
+                            if(!mVodView.isPlaying()){
+                                mVodView.start();
+                                enabeSendMessages = true;
+                            }
+                        }else if(message == "3"){
+
+                        }else if(message == "4"){
+
+                        }else{
+
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onClose(int i, String s, boolean b) {
+                Log.i("Websocket", "Closed " + s);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.i("Websocket", "Error " + e.getMessage());
+            }
+        };
+        mWebSocketClient.connect();
+    }
+
+    public void sendMessage(String message) {
+        if(enabeSendMessages){
+            mWebSocketClient.send(message);
+        }
+        Log.d("onMessage", "Message=" + message);
+    }
+
     private class MySimpleOnGestureListener extends SimpleOnGestureListener {
 
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             if (mVodView == null)
                 return false;
-            if (mVodView.isPlaying())
+            if (mVodView.isPlaying()) {
                 mVodView.pause();
-            else
+                sendMessage("1");
+            }else {
                 mVodView.start();
+                sendMessage("2");
+            }
             return true;
         }
 
@@ -116,6 +205,7 @@ public class SharonActivity extends ActionBarActivity {
             }
             Log.d("onScale", "scale=" + detector.getScaleFactor() + ", w=" + mW + ", h=" + mH);
             mVodView.setFixedVideoSize(mW, mH); // important
+            sendMessage(mW+","+mH);
             mRootParam.width = mW;
             mRootParam.height = mH;
             return true;
