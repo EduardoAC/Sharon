@@ -16,6 +16,11 @@
         android:layout_height="match_parent"
         android:layout_gravity="right|top"></LinearLayout>
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="left|top"></FrameLayout>
+
     <!--<RelativeLayout-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="match_parent" >-->
