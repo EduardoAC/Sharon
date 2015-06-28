@@ -1,5 +1,7 @@
 package sharon.sharon;
 
+import android.app.Dialog;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +16,7 @@ import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
@@ -145,18 +148,20 @@ public class SharonActivity extends ActionBarActivity {
                                 return;
                             }
                             if(code.equals("1")){
+                                //Paused
                                 if(mVodView.isPlaying()){
                                     mVodView.pause();
                                 }
                             }else if(code.equals("2")){
+                                //Play
                                 if(!mVodView.isPlaying()){
                                     mVodView.start();
                                     enabeSendMessages = true;
                                 }
                             }else if(code.equals("3")){
-
+                                //Slow motion start
                             }else if(code.equals("4")){
-
+                                //Slow motion stop
                             }else{
 
                             }
@@ -180,6 +185,23 @@ public class SharonActivity extends ActionBarActivity {
         };
         mWebSocketClient.connect();
     }
+//    public void onCoachMark(){
+//
+//        final Dialog dialog = new Dialog(this);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
+//        dialog.setContentView(R.layout.activity_sharon);
+//        dialog.setCanceledOnTouchOutside(true);
+//        //for dismissing anywhere you touch
+//        View masterView = dialog.findViewById(R.id.vodView1);
+//        masterView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                dialog.dismiss();
+//            }
+//        });
+//        dialog.show();
+//    }
 
     public void sendMessage(String message) {
 //        if(enabeSendMessages){
