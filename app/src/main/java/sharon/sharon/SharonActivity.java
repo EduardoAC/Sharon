@@ -20,6 +20,8 @@ import android.widget.TextView;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 //import com.android.volley.RequestQueue;
 //import com.android.volley.toolbox.Volley;
@@ -62,6 +64,7 @@ public class SharonActivity extends ActionBarActivity {
         mScaleGestureDetector = new ScaleGestureDetector(this, new MyScaleGestureListener());
         mGestureDetector = new GestureDetector(this, new MySimpleOnGestureListener());
 
+        connectWebSocket();
         //queue = Volley.newRequestQueue(this);
 
         mVodView.setOnTouchListener(new OnTouchListener() {
@@ -111,7 +114,7 @@ public class SharonActivity extends ActionBarActivity {
     private void connectWebSocket() {
         URI uri;
         try {
-            uri = new URI("ws://85.214.151.40:8080");
+            uri = new URI("ws://85.214.151.40:9000/sharonserver/server.php");
         } catch (URISyntaxException e) {
             e.printStackTrace();
             return;
@@ -121,7 +124,7 @@ public class SharonActivity extends ActionBarActivity {
             @Override
             public void onOpen(ServerHandshake serverHandshake) {
                 Log.i("Websocket", "Opened");
-                mWebSocketClient.send("Hello from " + Build.MANUFACTURER + " " + Build.MODEL);
+                mWebSocketClient.send("{\"name\":\"android\",\"message\":" +"\"Hello from " + Build.MANUFACTURER + " " + Build.MODEL+ "\",\"color\":\"000000\"}");
             }
 
             @Override
@@ -130,24 +133,33 @@ public class SharonActivity extends ActionBarActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if(message == "0"){
-                            return;
-                        }
-                        if(message == "1"){
-                            if(mVodView.isPlaying()){
-                                mVodView.pause();
+                        try {
+                            JSONObject jObject = new JSONObject(message);
+                            String code = jObject.getString("message");
+                            Log.i("Websocket.receive", message);
+                            Log.i("Websocket.code", code);
+                            if(code == "0"){
+                                return;
                             }
-                        }else if(message == "2"){
-                            if(!mVodView.isPlaying()){
-                                mVodView.start();
-                                enabeSendMessages = true;
+                            if(code.equals("1")){
+                                if(mVodView.isPlaying()){
+                                    mVodView.pause();
+                                }
+                            }else if(code.equals("2")){
+                                if(!mVodView.isPlaying()){
+                                    mVodView.start();
+                                    enabeSendMessages = true;
+                                }
+                            }else if(code.equals("3")){
+
+                            }else if(code.equals("4")){
+
+                            }else{
+
                             }
-                        }else if(message == "3"){
 
-                        }else if(message == "4"){
-
-                        }else{
-
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
                     }
                 });
@@ -167,9 +179,9 @@ public class SharonActivity extends ActionBarActivity {
     }
 
     public void sendMessage(String message) {
-        if(enabeSendMessages){
-            mWebSocketClient.send(message);
-        }
+//        if(enabeSendMessages){
+            mWebSocketClient.send("{\"name\":\"android\",\"message\":\"" +message+ "\",\"color\":\"000000\"}");
+//        }
         Log.d("onMessage", "Message=" + message);
     }
 
