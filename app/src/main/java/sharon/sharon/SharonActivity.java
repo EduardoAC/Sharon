@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 import android.widget.TextView;
 
+import org.java_websocket.WebSocket;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
@@ -60,6 +61,7 @@ public class SharonActivity extends ActionBarActivity {
         mVodView.setVideoURI(uri);
         mVodView.requestFocus();
         mVodView.start();
+        mVodView.pause();
         // set up gesture listeners
         mScaleGestureDetector = new ScaleGestureDetector(this, new MyScaleGestureListener());
         mGestureDetector = new GestureDetector(this, new MySimpleOnGestureListener());
@@ -180,7 +182,10 @@ public class SharonActivity extends ActionBarActivity {
 
     public void sendMessage(String message) {
 //        if(enabeSendMessages){
+        if(mWebSocketClient.getReadyState() == WebSocket.READYSTATE.OPEN){
             mWebSocketClient.send("{\"name\":\"android\",\"message\":\"" +message+ "\",\"color\":\"000000\"}");
+        }
+
 //        }
         Log.d("onMessage", "Message=" + message);
     }
