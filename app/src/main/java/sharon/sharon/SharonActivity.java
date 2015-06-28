@@ -59,13 +59,15 @@ public class SharonActivity extends ActionBarActivity {
 
         mVodView.setVideoURI(uri);
         mVodView.requestFocus();
-        mVodView.start();
+        mVodView.seekTo(1);
+
         // set up gesture listeners
         mScaleGestureDetector = new ScaleGestureDetector(this, new MyScaleGestureListener());
         mGestureDetector = new GestureDetector(this, new MySimpleOnGestureListener());
 
         connectWebSocket();
         //queue = Volley.newRequestQueue(this);
+
 
         mVodView.setOnTouchListener(new OnTouchListener() {
 
@@ -76,6 +78,7 @@ public class SharonActivity extends ActionBarActivity {
                 return true;
             }
         });
+
     }
 
     @Override
@@ -101,7 +104,6 @@ public class SharonActivity extends ActionBarActivity {
     }
     @Override
     protected void onResume() {
-        mVodView.start();
         super.onResume();
     }
 
@@ -194,7 +196,7 @@ public class SharonActivity extends ActionBarActivity {
             if (mVodView.isPlaying()) {
                 mVodView.pause();
                 sendMessage("1");
-            }else {
+            }else if(!mVodView.isPlaying()) {
                 mVodView.start();
                 sendMessage("2");
             }
